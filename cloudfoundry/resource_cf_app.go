@@ -133,9 +133,10 @@ func resourceApp() *schema.Resource {
 				Optional: true,
 			},
 			"docker_image": &schema.Schema{
-				Type:          schema.TypeString,
-				Optional:      true,
-				ConflictsWith: []string{"path"},
+				Type:             schema.TypeString,
+				Optional:         true,
+				ConflictsWith:    []string{"path"},
+				DiffSuppressFunc: diffSuppressOnStoppedApps,
 			},
 			"docker_credentials": &schema.Schema{
 				Type:          schema.TypeMap,
@@ -215,9 +216,10 @@ func resourceApp() *schema.Resource {
 				Sensitive: true,
 			},
 			"health_check_http_endpoint": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: diffSuppressOnStoppedApps,
 			},
 			"health_check_type": &schema.Schema{
 				Type:         schema.TypeString,
@@ -226,14 +228,16 @@ func resourceApp() *schema.Resource {
 				ValidateFunc: validateAppV3HealthCheckType,
 			},
 			"health_check_timeout": &schema.Schema{
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
+				Type:             schema.TypeInt,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: diffSuppressOnStoppedApps,
 			},
 			"health_check_invocation_timeout": &schema.Schema{
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
+				Type:             schema.TypeInt,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: diffSuppressOnStoppedApps,
 			},
 			"id_bg": &schema.Schema{
 				Type:     schema.TypeString,
@@ -288,6 +292,17 @@ func validateV3Strategy(v interface{}, k string) (ws []string, errs []error) {
 			fmt.Errorf("%q must be one of '%s' or 'none'", k, strings.Join(names, "', '")))
 	}
 	return ws, errs
+}
+
+// suppress diff on process/droplet related attributes
+func diffSuppressOnStoppedApps(k, old, new string, d *schema.ResourceData) bool {
+	log.Printf("[INFO] test supp diff %T", d.Get("stopped"))
+	if stopped, ok := d.GetOk("stopped"); ok {
+		if stopped.(bool) {
+			return true
+		}
+	}
+	return false
 }
 
 func resourceAppCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
