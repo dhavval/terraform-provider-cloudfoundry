@@ -10,7 +10,7 @@ This Terraform provider plugin allows you to configure a Cloud Foundry environme
 The documentation is available at https://registry.terraform.io/providers/cloudfoundry-community/cloudfoundry
 
 Using the provider
-------------------
+-------------------------------
 
 See doc at https://registry.terraform.io/providers/cloudfoundry-community/cloudfoundry , if you are under terraform 0.13 you can follow installation doc at https://github.com/cloudfoundry-community/terraform-provider-cloudfoundry/wiki  
 
